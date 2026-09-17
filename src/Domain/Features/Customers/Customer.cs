@@ -77,7 +77,7 @@ namespace Domain.Features.Customers
             return Result.Updated;
         }
 
-        public Result<Updated> UpsertParts(List<Vehicle> incomingVehicle)
+        public Result<Updated> UpdateCustomerVehicles(List<Vehicle> incomingVehicle)
         {
             _vehicles.RemoveAll(existing => incomingVehicle.All(v => v.Id != existing.Id));
 
