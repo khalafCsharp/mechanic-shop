@@ -1,0 +1,95 @@
+using Domain.Common.Entities;
+using Domain.Common.Results;
+using Domain.Features.RepairTasks.Parts;
+
+namespace Domain.Features.RepairTasks
+{
+    public sealed class RepairTask : AuditableEntity
+    {
+        public string Name { get; private set; }
+        public decimal LaborCost { get; private set; }
+        public RepairTaskDurationInMinutes EstimatedDurationInMins { get; private set; }
+
+        private readonly List<Part> _parts = [];
+        public IEnumerable<Part> Parts => _parts.AsReadOnly();
+        public decimal TotalCost => LaborCost + Parts.Sum(p => p.Cost * p.Quantity);
+
+
+        private RepairTask(Guid id, string name, decimal laborCost, RepairTaskDurationInMinutes estimatedDurationInMins, List<Part> parts)
+            : base(id)
+        {
+            Name = name;
+            LaborCost = laborCost;
+            EstimatedDurationInMins = estimatedDurationInMins;
+            _parts = parts;
+        }
+
+        public static Result<RepairTask> Create(Guid id, string name, decimal laborCost, RepairTaskDurationInMinutes estimatedDurationInMins, List<Part> parts)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return RepairTaskErrors.NameRequired;
+            }
+
+            if (laborCost <= 0)
+            {
+                return RepairTaskErrors.LaborCostInvalid;
+            }
+
+            if (!Enum.IsDefined(estimatedDurationInMins))
+            {
+                return RepairTaskErrors.DurationInvalid;
+            }
+
+            return new RepairTask(id, name.Trim(), laborCost, estimatedDurationInMins, parts);
+        }
+
+        public Result<Updated> UpdateRepairTaskParts(List<Part> incomingParts)
+        {
+            _parts.RemoveAll(existing => incomingParts.All(p => p.Id != existing.Id));
+
+            foreach (var incoming in incomingParts)
+            {
+                var existing = _parts.FirstOrDefault(p => p.Id == incoming.Id);
+                if (existing is null)
+                {
+                    _parts.Add(incoming);
+                }
+                else
+                {
+                    var updatePartResult = existing.Update(incoming.Name, incoming.Cost, incoming.Quantity);
+                    if (updatePartResult.IsError)
+                    {
+                        return updatePartResult.Errors;
+                    }
+                }
+            }
+
+            return Result.Updated;
+        }
+
+        public Result<Updated> Update(string name, decimal laborCost, RepairTaskDurationInMinutes estimatedDurationInMins)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return RepairTaskErrors.NameRequired;
+            }
+
+            if (laborCost <= 0 || laborCost > 10000)
+            {
+                return RepairTaskErrors.LaborCostInvalid;
+            }
+
+            if (!Enum.IsDefined(estimatedDurationInMins))
+            {
+                return RepairTaskErrors.DurationInvalid;
+            }
+
+            Name = name.Trim();
+            LaborCost = laborCost;
+            EstimatedDurationInMins = estimatedDurationInMins;
+
+            return Result.Updated;
+        }
+    }
+}
