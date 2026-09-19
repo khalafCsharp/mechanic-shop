@@ -1,3 +1,4 @@
+using Application.Features.Identity.Dtos;
 using Domain.Common.Results;
 
 namespace Application.Common.Interfaces
