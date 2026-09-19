@@ -8,7 +8,7 @@ namespace Application.Features.Customers.Queries.GetCustomers
     {
         public string CacheKey => "customers";
 
-        public string[] Tags => ["customer"];
+        public string[] Tags => ["customers"];
 
         public TimeSpan ExpiresIn => TimeSpan.FromMinutes(10);
     }

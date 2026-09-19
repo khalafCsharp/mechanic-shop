@@ -8,7 +8,7 @@ namespace Application.Features.Customers.Queries.GetCustomerById
     {
         public string CacheKey => $"customer_{CustomerId}";
 
-        public string[] Tags => ["customer"];
+        public string[] Tags => ["customers"];
 
         public TimeSpan ExpiresIn => TimeSpan.FromMinutes(10);
     }

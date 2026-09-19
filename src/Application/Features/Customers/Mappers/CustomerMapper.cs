@@ -23,7 +23,7 @@ namespace Application.Features.Customers.Mappers
         }
         public static List<CustomerDto> ToDtos(this IEnumerable<Customer> customers)
         {
-            return [.. customers.Select(c => ToDto(c))];
+            return [.. customers.Select(c => c.ToDto())];
         }
 
         public static VehicleDto ToDto(this Vehicle? vehicle)

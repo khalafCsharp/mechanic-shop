@@ -6,9 +6,9 @@ namespace Application.Features.Labors.Queries.GetLabors
 {
     public class GetLaborsQuery : ICachedQuery<Result<List<LaborDto>>>
     {
-        public string CacheKey => "labor";
+        public string CacheKey => "labors";
 
-        public string[] Tags => ["labor"];
+        public string[] Tags => ["labors"];
 
         public TimeSpan ExpiresIn => TimeSpan.FromMinutes(10);
     }
