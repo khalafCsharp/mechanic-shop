@@ -1,0 +1,15 @@
+using FluentValidation;
+
+namespace Application.Features.Dashboard.Queries.GetWorkOrderStats
+{
+    public class GetWorkOrderStatsQueryValidator : AbstractValidator<GetWorkOrderStatsQuery>
+    {
+        public GetWorkOrderStatsQueryValidator()
+        {
+            RuleFor(request => request.Date)
+                .NotEmpty()
+                .WithErrorCode("Date_Is_Required")
+                .WithMessage("Date is required.");
+        }
+    }
+}
