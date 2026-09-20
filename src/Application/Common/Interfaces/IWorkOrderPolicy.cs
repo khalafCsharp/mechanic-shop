@@ -11,8 +11,8 @@ namespace Application.Common.Interfaces
 
         Task<bool> IsVehicleAlreadyScheduled(Guid vehicleId, DateTimeOffset startAt, DateTimeOffset endAt, Guid? excludedWorkOrderId = null);
 
-        Task<Result<Success>> CheckSpotAvailabilityAsync(Spot spot, DateTimeOffset startAt, DateTimeOffset endAt, Guid? excludeWorkOrderId = null, CancellationToken ct = default);
+        Task<Result<Success>> CheckSpotAvailabilityAsync(Spot spot, DateTimeOffset startAt, DateTimeOffset endAt, CancellationToken ct = default);
 
-        Result<Success> ValidateMinimumRequirement(DateTimeOffset startAt, DateTimeOffset endAt);
+        Result<Success> ValidateMinimumAppointmentDurationRequiredInMinutes(DateTimeOffset startAt, DateTimeOffset endAt);
     }
 }
