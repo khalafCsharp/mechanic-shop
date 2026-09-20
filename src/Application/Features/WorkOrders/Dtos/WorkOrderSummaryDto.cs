@@ -1,0 +1,21 @@
+using Application.Features.Customers.Dtos;
+using Domain.Features.WorkOrders;
+using Domain.Features.WorkOrders.Enums;
+
+namespace Application.Features.WorkOrders.Dtos
+{
+    public class WorkOrderSummaryDto
+    {
+
+        public Guid WorkOrderId { get; set; }
+        public Guid? InvoiceId { get; set; }
+        public Spot Spot { get; set; }
+        public VehicleDto Vehicle { get; set; } = default!;
+        public string? Customer { get; set; }
+        public string? Labor { get; set; }
+        public WorkOrderState State { get; set; }
+        public DateTimeOffset StartAtUtc { get; set; }
+        public DateTimeOffset EndAtUtc { get; set; }
+        public List<string> RepairTasks { get; set; } = [];
+    }
+}
