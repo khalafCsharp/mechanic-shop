@@ -21,12 +21,12 @@ namespace Application.Features.RepairTasks.Commands.UpdateRepairTask
                 .IsInEnum()
                 .WithMessage("Invalid duration selected.");
 
-            RuleFor(x => x.Parts)
+            RuleFor(x => x.UpdatePartCommands)
                 .NotNull()
                 .Must(p => p.Count > 0)
                 .WithMessage("At least one part is required.");
 
-            RuleForEach(x => x.Parts)
+            RuleForEach(x => x.UpdatePartCommands)
                 .SetValidator(new UpdatePartCommandValidator());
         }
     }

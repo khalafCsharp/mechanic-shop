@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data
 {
-    public class AppDbContext : IdentityDbContext<AppUser>, IAppDbContext
+    public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator mediator) : IdentityDbContext<AppUser>(options), IAppDbContext
     {
         public DbSet<Customer> Customers => Set<Customer>();
 
@@ -67,11 +67,6 @@ namespace Infrastructure.Data
             builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
 
-        public AppDbContext(DbContextOptions<AppDbContext> options, IMediator mediator) : base(options)
-        {
-            this.mediator = mediator;
-        }
-
-        private readonly IMediator mediator;
+    
     }
 }

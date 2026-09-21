@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Features.RepairTasks.Commands.UpdateRepairTask
 {
-    public class UpdatePartCommandValidator : AbstractValidator<UpdateRepairTaskPartCommand>
+    public class UpdatePartCommandValidator : AbstractValidator<UpdatePartCommand>
     {
         public UpdatePartCommandValidator()
         {
