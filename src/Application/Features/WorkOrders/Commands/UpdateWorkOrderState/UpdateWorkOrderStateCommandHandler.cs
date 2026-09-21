@@ -51,7 +51,7 @@ namespace Application.Features.WorkOrders.Commands.UpdateWorkOrderState
 
                 return updateStatusResult.Errors;
             }
-            await context.SaveChangesAsync(cancellationToken);
+           
 
             if(request.NewState == WorkOrderState.Completed)
             {
@@ -59,7 +59,8 @@ namespace Application.Features.WorkOrders.Commands.UpdateWorkOrderState
             }
             workOrderToBeUpdated.AddDomainEvent(new WorkOrderCollectionModified());
 
-
+            await context.SaveChangesAsync(cancellationToken);
+            
             await cache.RemoveByTagAsync("work-orders", cancellationToken);
 
             return Result.Updated;

@@ -46,6 +46,7 @@ namespace Application.Features.WorkOrders.Commands.RelocateWorkOrder
             request.NewSpot,
             request.NewStartAt,
             endAt,
+            request.WorkOrderId,
             cancellationToken);
 
             if (checkSpotAvailabilityResult.IsError)
@@ -86,10 +87,10 @@ namespace Application.Features.WorkOrders.Commands.RelocateWorkOrder
 
                 return updateSpotResult.Errors;
             }
+            workOrderToBeUpdated.AddDomainEvent(new WorkOrderCollectionModified());
 
             await context.SaveChangesAsync(cancellationToken);
 
-            workOrderToBeUpdated.AddDomainEvent(new WorkOrderCollectionModified());
 
             await cache.RemoveByTagAsync("work-order", cancellationToken);
 

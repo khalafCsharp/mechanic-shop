@@ -89,6 +89,7 @@ namespace Application.Features.WorkOrders.Commands.UpdateWorkOrderRepairTasks
                 workOrderToBeUpdated.Spot,
                 workOrderToBeUpdated.StartAtUtc,
                 newEndAt,
+                 workOrderToBeUpdated.Id,
                 cancellationToken);
 
             if (spotCheckResult.IsError)
@@ -103,8 +104,9 @@ namespace Application.Features.WorkOrders.Commands.UpdateWorkOrderRepairTasks
             workOrderToBeUpdated.UpdateTiming(workOrderToBeUpdated.StartAtUtc, newEndAt);
 
 
-            await context.SaveChangesAsync(cancellationToken);
             workOrderToBeUpdated.AddDomainEvent(new WorkOrderCollectionModified());
+            
+            await context.SaveChangesAsync(cancellationToken);
 
 
             await cache.RemoveByTagAsync("work-orders", cancellationToken);

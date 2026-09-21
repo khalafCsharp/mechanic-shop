@@ -3,6 +3,7 @@ using Application.Common.Interfaces;
 using Domain.Common.Results;
 using Domain.Common.Results.Errors;
 using Domain.Features.WorkOrders;
+using Domain.Features.WorkOrders.Events;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
@@ -60,6 +61,7 @@ namespace Application.Features.WorkOrders.Commands.AssignNewLabor
 
                 return updateLaborResult.Errors;
             }
+            workOrderToBeUpdated.AddDomainEvent(new WorkOrderCollectionModified());
 
             await context.SaveChangesAsync(cancellationToken);
 

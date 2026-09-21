@@ -40,9 +40,11 @@ namespace Application.Features.WorkOrders.Commands.DeleteWorkOrder
             }
 
             context.WorkOrders.Remove(workOrderToBeDeleted);
-            await context.SaveChangesAsync(cancellationToken);
+
 
             workOrderToBeDeleted.AddDomainEvent(new WorkOrderCollectionModified());
+
+            await context.SaveChangesAsync(cancellationToken);
 
             await cache.RemoveByTagAsync("work-orders", cancellationToken);
 

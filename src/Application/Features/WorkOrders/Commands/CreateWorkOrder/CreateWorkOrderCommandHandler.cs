@@ -61,7 +61,7 @@ namespace Application.Features.WorkOrders.Commands.CreateWorkOrder
                 logger.LogError("work order duration is shorter than required duration");
                 return checkMinimumRequiredDurationForWorkOrdersResult.Errors;
             }
-            var spotAvailabilityCheckResult = await workOrderPolicy.CheckSpotAvailabilityAsync(request.Spot, request.StartAtUtc, endAtUtc, cancellationToken);
+            var spotAvailabilityCheckResult = await workOrderPolicy.CheckSpotAvailabilityAsync(request.Spot, request.StartAtUtc, endAtUtc);
 
             if (spotAvailabilityCheckResult.IsError)
             {
@@ -134,6 +134,7 @@ namespace Application.Features.WorkOrders.Commands.CreateWorkOrder
 
             context.WorkOrders.Add(workOrder);
 
+            workOrder.AddDomainEvent(new WorkOrderCollectionModified());
 
             await context.SaveChangesAsync(cancellationToken);
 
@@ -142,7 +143,7 @@ namespace Application.Features.WorkOrders.Commands.CreateWorkOrder
 
             logger.LogInformation("workOrder with id '{workOrderId}' created successfully.", workOrder.Id);
 
-            workOrder.AddDomainEvent(new WorkOrderCollectionModified());
+            
             
             await cache.RemoveByTagAsync("work-orders", cancellationToken);
 
