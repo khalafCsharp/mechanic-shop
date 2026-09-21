@@ -11,7 +11,7 @@ namespace Infrastructure.Settings
         public int DefaultPageNumber { get; set; }
         public int DefaultPageSize { get; set; }
         public int BookingCancellationThresholdMinutes { get; set; }
-        public int OverdueBookingCleanupFrequencyMinutes { get; set; }
+        public int StaleScheduledWorkOrdersCleanupFrequencyMinutes { get; set; }
         public string CorsPolicyName { get; set; } = default!;
         public string[] AllowedOrigins { get; set; } = default!;
     }
