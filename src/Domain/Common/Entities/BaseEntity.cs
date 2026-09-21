@@ -22,7 +22,7 @@ namespace Domain.Common.Entities
         {
             _domainEvents.Remove(de);
         }
-        public void ClearDomainEvent()
+        public void ClearDomainEvents()
         {
             _domainEvents.Clear();
         }
