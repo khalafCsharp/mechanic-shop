@@ -42,6 +42,11 @@ namespace Domain.Features.RepairTasks
                 return RepairTaskErrors.DurationInvalid;
             }
 
+            if(parts is null || parts.Count <=0)
+            {
+                return RepairTaskErrors.PartsRequired;
+            }
+
             return new RepairTask(id, name.Trim(), laborCost, estimatedDurationInMins, parts);
         }
 
