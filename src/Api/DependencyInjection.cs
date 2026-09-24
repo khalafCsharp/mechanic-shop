@@ -21,7 +21,16 @@ namespace Api
     {
         public static IServiceCollection AddPresentation(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddOutputCache().AddOpenTelemetryService().AddCustomProblemDetails().AddApiDocumentation().AddExceptionHandling().AddControllerWithJsonConfiguration().AddIdentityInfrastructure().AddAppRateLimiting().AddCustomApiVersioning().AddConfiguredCors(configuration);
+            services.AddOutputCache()
+            .AddOpenTelemetryService()
+            .AddCustomProblemDetails()
+            .AddApiDocumentation()
+            .AddExceptionHandling()
+            .AddControllerWithJsonConfiguration()
+            .AddIdentityInfrastructure()
+            .AddAppRateLimiting()
+            .AddCustomApiVersioning()
+            .AddConfiguredCors(configuration);
 
             return services;
         }
