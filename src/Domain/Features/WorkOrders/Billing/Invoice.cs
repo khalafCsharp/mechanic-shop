@@ -5,6 +5,7 @@ namespace Domain.Features.WorkOrders.Billing
 {
     public sealed class Invoice : AuditableEntity
     {
+        private Invoice(){}
         public Guid WorkOrderId { get; }
         public DateTimeOffset IssuedAtUtc { get; }
         public decimal DiscountAmount { get; private set; }

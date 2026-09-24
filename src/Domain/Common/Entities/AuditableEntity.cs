@@ -7,6 +7,8 @@ namespace Domain.Common.Entities
         public string? CreatedBy { get; set; }
         public string? LastModifiedBy { get; set; }
 
+        protected AuditableEntity(){}
+
         protected AuditableEntity(Guid id) : base(id)
         {
             

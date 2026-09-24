@@ -27,6 +27,7 @@ namespace Domain.Features.WorkOrders
 
         private readonly List<RepairTask> _repairTasks = [];
         public IEnumerable<RepairTask> RepairTasks => _repairTasks.AsReadOnly();
+        private WorkOrder(){}
 
         private WorkOrder(Guid id, Guid vehicleId, DateTimeOffset startAt, DateTimeOffset endAt, Guid laborId, Spot spot, WorkOrderState state, List<RepairTask> repairTasks)
             : base(id)

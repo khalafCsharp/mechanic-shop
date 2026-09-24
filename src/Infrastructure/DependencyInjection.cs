@@ -24,6 +24,7 @@ namespace Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddSignalR();
             services.AddSingleton(TimeProvider.System);
 
             var connectionString = configuration.GetConnectionString("DefaultConnection");

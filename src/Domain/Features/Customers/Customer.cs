@@ -14,7 +14,7 @@ namespace Domain.Features.Customers
 
         private readonly List<Vehicle> _vehicles = [];
         public IEnumerable<Vehicle> Vehicles => _vehicles.AsReadOnly();
-
+        private Customer() { }
         private Customer(Guid id, string name, string phoneNumber, string email, List<Vehicle> vehicles)
             : base(id)
         {

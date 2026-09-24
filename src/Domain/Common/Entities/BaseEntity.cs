@@ -9,6 +9,9 @@ namespace Domain.Common.Entities
         [NotMapped]
         public IReadOnlyCollection<DomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
+        protected BaseEntity()
+        { }
+
         protected BaseEntity(Guid id)
         {
             Id = id ==Guid.Empty ? Guid.NewGuid() : id;

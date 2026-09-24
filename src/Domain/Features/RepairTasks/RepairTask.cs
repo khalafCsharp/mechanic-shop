@@ -6,7 +6,7 @@ namespace Domain.Features.RepairTasks
 {
     public sealed class RepairTask : AuditableEntity
     {
-        public string Name { get; private set; }
+        public string Name { get; private set; } = string.Empty;
         public decimal LaborCost { get; private set; }
         public RepairTaskDurationInMinutes EstimatedDurationInMins { get; private set; }
 
@@ -14,6 +14,7 @@ namespace Domain.Features.RepairTasks
         public IEnumerable<Part> Parts => _parts.AsReadOnly();
         public decimal TotalCost => LaborCost + Parts.Sum(p => p.Cost * p.Quantity);
 
+        private RepairTask() { }
 
         private RepairTask(Guid id, string name, decimal laborCost, RepairTaskDurationInMinutes estimatedDurationInMins, List<Part> parts)
             : base(id)
