@@ -105,6 +105,8 @@ namespace Application.Features.Billing.Commands.IssueInvoice
 
             await context.Invoices.AddAsync(invoice, cancellationToken);
 
+            invoice.AddDomainEvent(new InvoiceIssued());
+
             await context.SaveChangesAsync(cancellationToken);
 
             await cache.RemoveByTagAsync("invoices", cancellationToken);

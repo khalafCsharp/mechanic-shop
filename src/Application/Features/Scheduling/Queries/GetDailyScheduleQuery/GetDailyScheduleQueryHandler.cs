@@ -1,92 +1,87 @@
-using Application.Common.Interfaces;
-using Application.Features.Labors.Mappers;
-using Application.Features.RepairTasks.Mappers;
-using Application.Features.Scheduling.Dtos;
-using Domain.Common.Results;
-using Domain.Features.Customers.Vehicles;
-using Domain.Features.WorkOrders;
-using Domain.Features.WorkOrders.Enums;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-
-namespace Application.Features.Scheduling.Queries.GetDailyScheduleQuery
+namespace MechanicShop.Application.Features.Scheduling.Queries.GetDailyScheduleQuery
 {
-    public class GetDailyScheduleQueryHandler : IRequestHandler<GetDailyScheduleQuery, Result<ScheduleDto>>
+    using Domain.Common.Results;
+    using Domain.Features.Customers.Vehicles;
+    using Domain.Features.WorkOrders.Enums;
+    using global::Application.Common.Interfaces;
+    using global::Application.Features.Labors.Mappers;
+    using global::Application.Features.RepairTasks.Mappers;
+    using global::Application.Features.Scheduling.Dtos;
+    using MediatR;
+    using Microsoft.EntityFrameworkCore;
+
+    public class GetDailyScheduleQueryHandler(
+        IAppDbContext context,
+        TimeProvider datetime)
+        : IRequestHandler<GetDailyScheduleQuery, Result<ScheduleDto>>
     {
-        private readonly IAppDbContext context;
-        private readonly TimeProvider dateTime;
+        private readonly IAppDbContext context = context;
+        private readonly TimeProvider datetime = datetime;
 
-        public GetDailyScheduleQueryHandler(IAppDbContext context, TimeProvider dateTime)
+        public async Task<Result<ScheduleDto>> Handle(GetDailyScheduleQuery query, CancellationToken ct)
         {
-            this.context = context;
-            this.dateTime = dateTime;
-        }
-
-        private static string? FormatVehicleInfo(Vehicle vehicle) =>
-       vehicle != null ? $"{vehicle.Make} | {vehicle.LicensePlate}" : null;
-        public async Task<Result<ScheduleDto>> Handle(GetDailyScheduleQuery request, CancellationToken cancellationToken)
-        {
-            var localStart = request.ScheduleDate.ToDateTime(TimeOnly.MinValue);
+            var localStart = query.ScheduleDate.ToDateTime(TimeOnly.MinValue);
             var localEnd = localStart.AddDays(1);
 
-            var utcStart = TimeZoneInfo.ConvertTimeToUtc(localStart, request.TimeZone);
-            var utcEnd = TimeZoneInfo.ConvertTimeToUtc(localEnd, request.TimeZone);
+            var utcStart = TimeZoneInfo.ConvertTimeToUtc(localStart, query.TimeZone);
+            var utcEnd = TimeZoneInfo.ConvertTimeToUtc(localEnd, query.TimeZone);
 
-            var workOrders = await context.WorkOrders
-           .Where(w =>
-               w.StartAtUtc < utcEnd &&
-               w.EndAtUtc > utcStart &&
-               (request.LaborId == null || w.LaborId == request.LaborId))
-           .Include(w => w.RepairTasks)
-           .Include(w => w.Vehicle)
-           .Include(w => w.Labor)
-           .ToListAsync(cancellationToken);
+            var workOrders = await this.context.WorkOrders
+                .Where(w =>
+                    w.StartAtUtc < utcEnd &&
+                    w.EndAtUtc > utcStart &&
+                    (query.LaborId == null || w.LaborId == query.LaborId))
+                .Include(w => w.RepairTasks)
+                .Include(w => w.Vehicle)
+                .Include(w => w.Labor)
+                .ToListAsync(ct);
 
-            var localNow = TimeZoneInfo.ConvertTime(dateTime.GetUtcNow(), request.TimeZone);
+            var now = TimeZoneInfo.ConvertTime(this.datetime.GetUtcNow(), query.TimeZone);
 
             var result = new ScheduleDto
             {
-                ScheduleDate = request.ScheduleDate,
-                IsEndOfDay = localEnd < localNow,
-                Spots = []
+                ScheduleDate = query.ScheduleDate,
+                IsEndOfDay = localEnd < now,
+                Spots = [],
             };
 
-            foreach (Spot spot in Enum.GetValues<Spot>())
+            foreach (var spot in Enum.GetValues<Spot>())
             {
-                var currentTime = localStart;
+                var current = localStart;
                 var slots = new List<SlotDto>();
 
-
-                var workOrdersBySpot = workOrders
+                var woBySpot = workOrders
                     .Where(w => w.Spot == spot)
+
                     .OrderBy(w => w.StartAtUtc)
                     .ToList();
 
-                while (currentTime < localEnd)
+                while (current < localEnd)
                 {
-                    var next = currentTime.AddMinutes(15);
-                    var startUtc = TimeZoneInfo.ConvertTimeToUtc(currentTime, request.TimeZone);
-                    var endUtc = TimeZoneInfo.ConvertTimeToUtc(next, request.TimeZone);
+                    var next = current.AddMinutes(15);
+                    var startUtc = TimeZoneInfo.ConvertTimeToUtc(current, query.TimeZone);
+                    var endUtc = TimeZoneInfo.ConvertTimeToUtc(next, query.TimeZone);
 
-                    WorkOrder? workOrder = workOrdersBySpot.FirstOrDefault(w => w.StartAtUtc < endUtc && w.EndAtUtc > startUtc);
+                    var wo = woBySpot.FirstOrDefault(w =>
+                        w.StartAtUtc < endUtc && w.EndAtUtc > startUtc);
 
-                    if (workOrder != null)
+                    if (wo != null)
                     {
-                        if (!slots.Any(s => s.WorkOrderId == workOrder.Id))
+                        if (!slots.Any(s => s.WorkOrderId == wo.Id))
                         {
                             slots.Add(new SlotDto
                             {
-                                WorkOrderId = workOrder.Id,
+                                WorkOrderId = wo.Id,
                                 Spot = spot,
-                                StartAtUtc = workOrder.StartAtUtc,
-                                EndAtUtc = workOrder.EndAtUtc,
-                                Vehicle = FormatVehicleInfo(workOrder.Vehicle!),
-                                Labor = workOrder.Labor!.ToDto(),
+                                StartAtUtc = wo.StartAtUtc,
+                                EndAtUtc = wo.EndAtUtc,
+                                Vehicle = FormatVehicleInfo(wo.Vehicle!),
+                                Labor = wo.Labor!.ToDto(),
                                 IsOccupied = true,
-                                RepairTasks = [.. workOrder.RepairTasks.ToList().ConvertAll(rt => rt.ToDto())],
-                                IsWorkOrderLocked = !workOrder.IsEditable,
-                                State = workOrder.State,
-                                IsAvailable = false
+                                RepairTasks = [.. wo.RepairTasks.ToList().ConvertAll(rt => rt.ToDto())],
+                                IsWorkOrderLocked = !wo.IsEditable,
+                                State = wo.State,
+                                IsAvailable = false,
                             });
                         }
                     }
@@ -98,18 +93,24 @@ namespace Application.Features.Scheduling.Queries.GetDailyScheduleQuery
                             StartAtUtc = startUtc,
                             EndAtUtc = endUtc,
                             IsWorkOrderLocked = false,
-                            IsAvailable = currentTime >= localNow
+                            IsAvailable = current >= now,
                         });
                     }
-                    currentTime = next;
+
+                    current = next;
                 }
+
                 result.Spots.Add(new SpotDto
                 {
                     Spot = spot,
-                    Slots = slots
+                    Slots = slots,
                 });
             }
+
             return result;
         }
+
+        private static string? FormatVehicleInfo(Vehicle vehicle) =>
+            vehicle != null ? $"{vehicle.Make} | {vehicle.LicensePlate}" : null;
     }
 }

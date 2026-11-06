@@ -19,6 +19,6 @@ namespace Api.Requests.WorkOrders
         public Guid LaborId { get; set; }
 
         [Required(ErrorMessage = "StartAt is required.")]
-        public DateTimeOffset StartAtUtc { get; set; }
+        public DateTimeOffset StartAt { get; set; }
     }
 }

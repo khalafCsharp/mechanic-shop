@@ -15,10 +15,8 @@ namespace Application.Features.WorkOrders.Queries.GetWorkOrders
     WorkOrderState? State = null,
     Guid? VehicleId = null,
     Guid? LaborId = null,
-    DateTime? StartDateFrom = null,
-    DateTime? StartDateTo = null,
-    DateTime? EndDateFrom = null,
-    DateTime? EndDateTo = null,
+    DateTime? StartDate = null,
+    DateTime? EndDate = null,
     Spot? Spot = null) : ICachedQuery<Result<PaginatedList<WorkOrderSummaryDto>>>
     {
         public string CacheKey => $"work-orders:p={Page}:ps={PageSize}" +
@@ -27,10 +25,8 @@ namespace Application.Features.WorkOrders.Queries.GetWorkOrders
         $":state={State?.ToString() ?? "-"}" +
         $":veh={VehicleId?.ToString() ?? "-"}" +
         $":lab={LaborId?.ToString() ?? "-"}" +
-        $":sdfrom={StartDateFrom?.ToString("yyyyMMdd") ?? "-"}" +
-        $":sdto={StartDateTo?.ToString("yyyyMMdd") ?? "-"}" +
-        $":edfrom={EndDateFrom?.ToString("yyyyMMdd") ?? "-"}" +
-        $":edto={EndDateTo?.ToString("yyyyMMdd") ?? "-"}" +
+        $":sd={StartDate?.ToString("yyyyMMdd") ?? "-"}" +
+        $":edfrom={EndDate?.ToString("yyyyMMdd") ?? "-"}" +
         $":spot={Spot?.ToString() ?? "-"}";
 
         public string[] Tags => ["work-orders"];

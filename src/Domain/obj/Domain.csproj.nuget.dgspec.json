@@ -13,6 +13,7 @@
         "packagesPath": "/home/alex/.nuget/packages/",
         "outputPath": "/home/alex/Desktop/mechanic-shop/src/Domain/obj/",
         "projectStyle": "PackageReference",
+        "centralPackageVersionsManagementEnabled": true,
         "configFilePaths": [
           "/home/alex/.nuget/NuGet/NuGet.Config"
         ],
@@ -47,8 +48,32 @@
           "dependencies": {
             "MediatR": {
               "target": "Package",
-              "version": "[14.2.0, )"
+              "version": "[14.2.0, )",
+              "versionCentrallyManaged": true
             }
+          },
+          "centralPackageVersions": {
+            "Asp.Versioning.Mvc": "10.2.1",
+            "Asp.Versioning.Mvc.ApiExplorer": "10.2.1",
+            "Asp.Versioning.OpenApi": "10.2.3",
+            "coverlet.collector": "6.0.4",
+            "FluentValidation.DependencyInjectionExtensions": "12.1.1",
+            "MediatR": "14.2.0",
+            "Microsoft.AspNetCore.Authentication.JwtBearer": "10.0.12",
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "10.0.12",
+            "Microsoft.AspNetCore.OpenApi": "10.0.12",
+            "Microsoft.EntityFrameworkCore": "10.0.12",
+            "Microsoft.EntityFrameworkCore.Design": "10.0.12",
+            "Microsoft.EntityFrameworkCore.SqlServer": "10.0.12",
+            "Microsoft.Extensions.Caching.Hybrid": "10.10.0",
+            "Microsoft.NET.Test.Sdk": "17.14.1",
+            "Moq": "4.20.72",
+            "QuestPDF": "2026.9.0",
+            "Scalar.AspNetCore": "2.17.7",
+            "Serilog.AspNetCore": "10.0.0",
+            "Serilog.Sinks.Seq": "9.1.0",
+            "xunit": "2.9.3",
+            "xunit.runner.visualstudio": "3.1.4"
           },
           "imports": [
             "net461",

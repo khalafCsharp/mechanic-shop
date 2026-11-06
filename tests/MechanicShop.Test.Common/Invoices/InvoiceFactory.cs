@@ -15,7 +15,9 @@ namespace MechanicShop.Test.Common.Invoices
             return Invoice.Create(
                 Id ?? Guid.NewGuid(),
                 WorkOrderId ?? Guid.NewGuid(),
-                Items ?? [InvoiceLineItem.Create(invoiceId: Guid.NewGuid(), lineNumber: 3, description: "changing front lights", quantity: 2, unitPrice: 200m).Value],
+                Items ?? [InvoiceLineItem.Create(invoiceId: Guid.NewGuid(), lineNumber: 3,
+                 description: "changing front lights",
+                  quantity: 2, unitPrice: 200m).Value],
                 Discount ?? 0, TaxAmount ?? 0,
                 TimeProvider ?? TimeProvider.System
             );

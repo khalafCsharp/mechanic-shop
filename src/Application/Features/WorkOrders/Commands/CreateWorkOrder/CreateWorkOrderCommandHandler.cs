@@ -22,11 +22,13 @@ namespace Application.Features.WorkOrders.Commands.CreateWorkOrder
         private readonly ILogger<CreateWorkOrderCommandHandler> logger;
         private readonly HybridCache cache;
         private readonly IWorkOrderPolicy workOrderPolicy;
+        private readonly IMediator mediator;
 
-        public CreateWorkOrderCommandHandler(IAppDbContext context, ILogger<CreateWorkOrderCommandHandler> logger, HybridCache cache, IWorkOrderPolicy workOrderPolicy)
+        public CreateWorkOrderCommandHandler(IAppDbContext context, ILogger<CreateWorkOrderCommandHandler> logger, HybridCache cache, IWorkOrderPolicy workOrderPolicy, IMediator mediator)
         {
             this.cache = cache;
             this.workOrderPolicy = workOrderPolicy;
+            this.mediator = mediator;
             this.context = context;
             this.logger = logger;
         }
@@ -70,25 +72,25 @@ namespace Application.Features.WorkOrders.Commands.CreateWorkOrder
                 return spotAvailabilityCheckResult.Errors;
             }
 
-            Vehicle? vehicleToBeAppointedToWorkOrder = await context.Vehicles.Include(v => v.Customer).FirstOrDefaultAsync(v => v.Id == request.VehicleId, cancellationToken);
+            Vehicle? vehicleToBeAppointedToWorkOrder = await this.context.Vehicles.Include(v => v.Customer).FirstOrDefaultAsync(v => v.Id == request.VehicleId, cancellationToken);
 
             if (vehicleToBeAppointedToWorkOrder is null)
             {
-                logger.LogError("vehicel with id: {vehicleId} not found", request.VehicleId);
+                this.logger.LogError("vehicel with id: {vehicleId} not found", request.VehicleId);
 
                 return ApplicationErrors.VehicleNotFound;
             }
 
-            Employee? laborToBeAssignedToWorkOrder = await context.Employees.FindAsync([request.LaborId], cancellationToken);
+            Employee? laborToBeAssignedToWorkOrder = await this.context.Employees.FindAsync([request.LaborId], cancellationToken);
 
             if (laborToBeAssignedToWorkOrder is null)
             {
-                logger.LogError("labor with id: {laborId} does not exist", request.LaborId.ToString());
+                this.logger.LogError("labor with id: {laborId} does not exist", request.LaborId.ToString());
 
                 return ApplicationErrors.LaborNotFound;
             }
 
-            bool vehicleHasOnGoingWorkOrder = await context.WorkOrders.AnyAsync(wo => wo.VehicleId == request.VehicleId
+            bool vehicleHasOnGoingWorkOrder = await this.context.WorkOrders.AnyAsync(wo => wo.VehicleId == request.VehicleId
             && wo.StartAtUtc < endAtUtc
             && wo.EndAtUtc > request.StartAtUtc, cancellationToken);
 
@@ -141,7 +143,7 @@ namespace Application.Features.WorkOrders.Commands.CreateWorkOrder
             workOrder.Vehicle = vehicleToBeAppointedToWorkOrder;
             workOrder.Labor = laborToBeAssignedToWorkOrder;
 
-            logger.LogInformation("workOrder with id '{workOrderId}' created successfully.", workOrder.Id);
+            logger.LogError("workOrder with id '{workOrderId}' created successfully.", workOrder.Id);
 
             
             

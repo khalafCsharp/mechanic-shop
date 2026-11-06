@@ -43,7 +43,7 @@ namespace Application.Features.Customers.Commands.DeleteCustomer
 
             context.Customers.Remove(customerToBeDeleted);
             await context.SaveChangesAsync(cancellationToken);
-            await cache.RemoveByTagAsync("customer", cancellationToken);
+            await cache.RemoveByTagAsync("customers", cancellationToken);
 
             logger.LogInformation("Customer {CustomerId} deleted successfully.", request.CustomerId);
 

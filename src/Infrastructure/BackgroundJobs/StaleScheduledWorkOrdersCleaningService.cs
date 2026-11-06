@@ -1,14 +1,17 @@
-using Application.Common.Interfaces;
-using Domain.Features.WorkOrders;
-using Infrastructure.Settings;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-
 namespace Infrastructure.BackgroundJobs
 {
+    using Application.Common.Interfaces;
+    using Domain.Features.WorkOrders;
+    using Infrastructure.Settings;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
+
+    /// <summary>
+    /// creates a background job that checks for unattended workorder appointments and removes them.
+    /// </summary>
     public class StaleScheduledWorkOrdersCleaningService : BackgroundService
     {
         private readonly IServiceScopeFactory scopeFactory;
@@ -16,6 +19,13 @@ namespace Infrastructure.BackgroundJobs
         private readonly AppSettings appSettings;
         private readonly TimeProvider dateTime;
 
+        /// <summary>
+ /// Initializes a new instance of the <see cref="StaleScheduledWorkOrdersCleaningService"/> class.
+        /// </summary>
+        /// <param name="scopeFactory"> the scope factory to create services within scopes.</param>
+        /// <param name="logger"> for logging.</param>
+        /// <param name="options">Retrieves configured AppSettings instances.</param>
+        /// <param name="dateTime">provides time.</param>
         public StaleScheduledWorkOrdersCleaningService(
         IServiceScopeFactory scopeFactory,
         ILogger<StaleScheduledWorkOrdersCleaningService> logger,
@@ -28,20 +38,21 @@ namespace Infrastructure.BackgroundJobs
             this.dateTime = dateTime;
         }
 
+        /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            using var timer = new PeriodicTimer(TimeSpan.FromMinutes(appSettings.StaleScheduledWorkOrdersCleanupFrequencyMinutes));
+            using var timer = new PeriodicTimer(TimeSpan.FromMinutes(this.appSettings.StaleScheduledWorkOrdersCleanupFrequencyMinutes));
 
             while (await timer.WaitForNextTickAsync(cancellationToken))
             {
-                logger.LogInformation("Checking staled scheduled work orders at {time}", dateTime.GetUtcNow());
+                this.logger.LogInformation("Checking staled scheduled work orders at {time}", this.dateTime.GetUtcNow());
 
                 try
                 {
-                    using var scope = scopeFactory.CreateScope();
+                    using var scope = this.scopeFactory.CreateScope();
                     var context = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
 
-                    var staleBookingThresholdUtc = dateTime.GetUtcNow().AddMinutes(-appSettings.BookingCancellationThresholdMinutes);
+                    var staleBookingThresholdUtc = this.dateTime.GetUtcNow().AddMinutes(-this.appSettings.BookingCancellationThresholdMinutes);
 
                     var staledWorkOrders = await context.WorkOrders
                    .Where(w => w.State == WorkOrderState.Scheduled && w.StartAtUtc <= staleBookingThresholdUtc)
@@ -55,22 +66,22 @@ namespace Infrastructure.BackgroundJobs
 
                             if (workOrderCancellationResult.IsError)
                             {
-                                logger.LogWarning("Failed to cancel WorkOrder {id}: {Errors}", swo.Id, workOrderCancellationResult.Errors);
+                                this.logger.LogWarning("Failed to cancel WorkOrder {id}: {Errors}", swo.Id, workOrderCancellationResult.Errors);
                             }
                         }
+
                         await context.SaveChangesAsync(cancellationToken);
 
-                        logger.LogInformation("Cancelled {count} staled work orders: {ids}", staledWorkOrders.Count, staledWorkOrders.Select(w => w.Id));
+                        this.logger.LogInformation("Cancelled {count} staled work orders: {ids}", staledWorkOrders.Count, staledWorkOrders.Select(w => w.Id));
                     }
                     else
                     {
-                        logger.LogInformation("No staled work orders found.");
+                        this.logger.LogInformation("No staled work orders found.");
                     }
-
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Error cleaning up staled work orders.");
+                    this.logger.LogError(ex, "Error cleaning up staled work orders.");
                 }
             }
         }

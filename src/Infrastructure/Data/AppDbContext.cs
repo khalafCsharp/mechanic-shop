@@ -12,10 +12,11 @@ using Infrastructure.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Data
 {
-    public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator mediator) : IdentityDbContext<AppUser>(options), IAppDbContext
+    public class AppDbContext(DbContextOptions<AppDbContext> options, IMediator mediator, ILogger<AppDbContext> logger) : IdentityDbContext<AppUser>(options), IAppDbContext
     {
         public DbSet<Customer> Customers => Set<Customer>();
 
@@ -33,33 +34,70 @@ namespace Infrastructure.Data
 
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-            await DispatchDomainEventsAsync(cancellationToken);
-            return await base.SaveChangesAsync(cancellationToken);
-        }
+      
+        public override async Task<int> SaveChangesAsync(
+    CancellationToken cancellationToken = default)
+{
+    var entitiesWithEvents = ChangeTracker
+        .Entries()
+        .Where(e =>
+            e.Entity is BaseEntity baseEntity &&
+            baseEntity.DomainEvents.Count != 0)
+        .Select(e => (BaseEntity)e.Entity)
+        .ToList();
 
-        private async Task DispatchDomainEventsAsync(CancellationToken cancellationToken)
-        {
-            var domainEntitiesThatHasEvents = ChangeTracker.Entries()
-           .Where(e => e.Entity is BaseEntity baseEntity && baseEntity.DomainEvents.Count != 0)
-           .Select(e => (BaseEntity)e.Entity)
-           .ToList();
+    var domainEvents = entitiesWithEvents
+        .SelectMany(e => e.DomainEvents)
+        .ToList();
+         logger.LogError(
+    "Dispatching {Count} domain events",
+    domainEvents.Count);
 
-            var domainEvents = domainEntitiesThatHasEvents
-                .SelectMany(e => e.DomainEvents)
-                .ToList();
+    var result = await base.SaveChangesAsync(cancellationToken);
 
-            foreach (var domainEvent in domainEvents)
-            {
-                await mediator.Publish(domainEvent, cancellationToken);
-            }
+    foreach (var domainEvent in domainEvents)
+    {
+                          logger.LogError(
+        "Publishing domain event: {EventType}",
+        domainEvent.GetType().Name);
+        await mediator.Publish(domainEvent, cancellationToken);
+    }
 
-            foreach (var entity in domainEntitiesThatHasEvents)
-            {
-                entity.ClearDomainEvents();
-            }
-        }
+    foreach (var entity in entitiesWithEvents)
+    {
+        entity.ClearDomainEvents();
+    }
+
+    return result;
+}
+        
+    //     private async Task DispatchDomainEventsAsync(CancellationToken cancellationToken)
+    //     {
+    //         var domainEntitiesThatHasEvents = ChangeTracker.Entries()
+    //        .Where(e => e.Entity is BaseEntity baseEntity && baseEntity.DomainEvents.Count != 0)
+    //        .Select(e => (BaseEntity)e.Entity)
+    //        .ToList();
+
+    //         var domainEvents = domainEntitiesThatHasEvents
+    //             .SelectMany(e => e.DomainEvents)
+    //             .ToList();
+    //             logger.LogError(
+    // "Dispatching {Count} domain events",
+    // domainEvents.Count);
+
+    //         foreach (var domainEvent in domainEvents)
+    //         {
+    //               logger.LogError(
+    //     "Publishing domain event: {EventType}",
+    //     domainEvent.GetType().Name);
+    //             await mediator.Publish(domainEvent, cancellationToken);
+    //         }
+
+    //         foreach (var entity in domainEntitiesThatHasEvents)
+    //         {
+    //             entity.ClearDomainEvents();
+    //         }
+    //     }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

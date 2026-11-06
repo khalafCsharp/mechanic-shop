@@ -65,7 +65,7 @@ namespace Application.Features.WorkOrders.Commands.AssignNewLabor
 
             await context.SaveChangesAsync(cancellationToken);
 
-            await cache.RemoveByTagAsync("work-order", cancellationToken);
+            await cache.RemoveByTagAsync("work-orders", cancellationToken);
 
             return Result.Updated;
         }

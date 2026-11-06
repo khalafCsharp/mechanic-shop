@@ -1,28 +1,24 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json.Serialization;
-using System.Threading.RateLimiting;
-using System.Threading.Tasks;
-using Api.Infrastructure;
-using Api.OpenApi.Transformers;
-using Application.Common.Interfaces;
-using Asp.Versioning;
-using Infrastructure.Settings;
-using Microsoft.AspNetCore.RateLimiting;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-using Serilog;
-
 namespace Api
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text.Json.Serialization;
+    using System.Threading.RateLimiting;
+    using System.Threading.Tasks;
+    using Api.Infrastructure;
+    using Api.OpenApi.Transformers;
+    using Application.Common.Interfaces;
+    using Asp.Versioning;
+    using global::Infrastructure.Settings;
+    using Microsoft.AspNetCore.RateLimiting;
+    using Serilog;
     public static class DependencyInjection
     {
         public static IServiceCollection AddPresentation(this IServiceCollection services, IConfiguration configuration)
         {
+               QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
             services.AddOutputCache()
-            .AddOpenTelemetryService()
             .AddCustomProblemDetails()
             .AddApiDocumentation()
             .AddExceptionHandling()
@@ -75,6 +71,8 @@ namespace Api
 
         private static IServiceCollection AddConfiguredCors(this IServiceCollection services, IConfiguration configuration)
         {
+            services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
+
             var appSettings = configuration.GetSection("AppSettings").Get<AppSettings>()!;
 
             services.AddCors(options => options.AddPolicy(
@@ -139,28 +137,7 @@ namespace Api
 
             return services;
         }
-        private static IServiceCollection AddOpenTelemetryService(this IServiceCollection services)
-        {
-            services.AddOpenTelemetry()
-        .ConfigureResource(res => res.AddService("orderservice"))
-        .WithTracing(tracing =>
-        {
-            tracing.AddAspNetCoreInstrumentation().
-            AddHttpClientInstrumentation();
-
-            tracing.AddOtlpExporter();
-        }).
-        WithMetrics(metrics =>
-        {
-            metrics.AddAspNetCoreInstrumentation().
-            AddHttpClientInstrumentation();
-
-            metrics.AddOtlpExporter().
-            AddPrometheusExporter();
-        });
-
-            return services;
-        }
+        
         private static IServiceCollection AddOutputCache(this IServiceCollection services)
         {
             services.AddOutputCache(options =>

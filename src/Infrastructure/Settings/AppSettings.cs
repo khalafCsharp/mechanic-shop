@@ -2,6 +2,7 @@ namespace Infrastructure.Settings
 {
     public class AppSettings
     {
+        public string TimeZoneId { get; set; }
         public TimeOnly OpeningTime { get; set; }
         public TimeOnly ClosingTime { get; set; }
         public int MaxSpots { get; set; }

@@ -61,7 +61,7 @@ namespace Application.Features.Customers.Commands.UpdateCustomer
             }
 
             await context.SaveChangesAsync(cancellationToken);
-            await cache.RemoveByTagAsync("customer", cancellationToken);
+            await cache.RemoveByTagAsync("customers", cancellationToken);
 
             return Result.Updated;
         }

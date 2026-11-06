@@ -15,7 +15,7 @@ namespace Api.Requests
         [Required(ErrorMessage = "Year is required.")]
         public int Year { get; set; }
 
-        [Required(ErrorMessage = "Spot is required.")]
+        [Required(ErrorMessage = "license plate is required.")]
         public string LicensePlate { get; set; } = string.Empty;
     }
 }

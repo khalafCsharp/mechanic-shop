@@ -26,17 +26,17 @@ namespace Application.Features.WorkOrders.Commands.UpdateWorkOrderState
         }
         public async Task<Result<Updated>> Handle(UpdateWorkOrderStateCommand request, CancellationToken cancellationToken)
         {
-            var workOrderToBeUpdated = await context.WorkOrders
+            var workOrderToBeUpdated = await this.context.WorkOrders
            .FirstOrDefaultAsync(a => a.Id == request.WorkOrderId, cancellationToken);
 
             if (workOrderToBeUpdated is null)
             {
-                logger.LogError("WorkOrder with id: {workorderId} does not exist.", request.WorkOrderId);
+                this.logger.LogError("WorkOrder with id: {workorderId} does not exist.", request.WorkOrderId);
 
                 return ApplicationErrors.WorkOrderNotFound;
             }
 
-            if(workOrderToBeUpdated.StartAtUtc > dateTime.GetUtcNow())
+            if(workOrderToBeUpdated.StartAtUtc > this.dateTime.GetUtcNow())
             {
                 logger.LogError("cannot change work order's state before its commence time for work order id: {workOrderId}", workOrderToBeUpdated.Id);
 

@@ -56,7 +56,7 @@ namespace Application.Features.Customers.Commands.CreateCustomer
             context.Customers.Add(createCustomerResult.Value);
             await context.SaveChangesAsync(cancellationToken);
 
-            await cache.RemoveByTagAsync("customer", cancellationToken);
+            await cache.RemoveByTagAsync("customers", cancellationToken);
 
             logger.LogInformation("a new customer was created with id: {newCustomerId}", createCustomerResult.Value.Id);
 

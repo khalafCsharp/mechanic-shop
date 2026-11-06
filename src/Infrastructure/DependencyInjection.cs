@@ -17,6 +17,7 @@ using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
 namespace Infrastructure
 {
@@ -46,6 +47,8 @@ namespace Infrastructure
 
             services.AddScoped<ApplicationDbContextInitialiser>();
 
+            Serilog.Log.Logger = new LoggerConfiguration().MinimumLevel.Information().WriteTo.Seq("http://seq:5341").CreateLogger();
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -64,7 +67,7 @@ namespace Infrastructure
                     ValidIssuer = jwtSettings["Issuer"],
                     ValidAudience = jwtSettings["Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(
-                           Encoding.UTF8.GetBytes(jwtSettings["Secret"]!)),
+                           Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!)),
                 };
             });
 

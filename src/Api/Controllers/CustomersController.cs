@@ -73,8 +73,8 @@ public sealed class CustomersController(ISender sender) : ApiController
         var result = await sender.Send(
             new CreateCustomerCommand(
             request.Name,
-            request.PhoneNumber,
             request.Email,
+            request.PhoneNumber,
             vehicles),
             ct);
 
@@ -104,8 +104,8 @@ public sealed class CustomersController(ISender sender) : ApiController
         var command = new UpdateCustomerCommand(
             customerId,
             request.Name,
-            request.PhoneNumber,
             request.Email,
+            request.PhoneNumber,
             vehicles);
 
         var result = await sender.Send(command, ct);

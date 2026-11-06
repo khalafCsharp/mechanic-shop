@@ -43,6 +43,9 @@ namespace Application.Features.WorkOrders.Commands.DeleteWorkOrder
 
 
             workOrderToBeDeleted.AddDomainEvent(new WorkOrderCollectionModified());
+            logger.LogError(
+    "WorkOrder domain events before SaveChanges: {Count}",
+    workOrderToBeDeleted.DomainEvents.Count);
 
             await context.SaveChangesAsync(cancellationToken);
 

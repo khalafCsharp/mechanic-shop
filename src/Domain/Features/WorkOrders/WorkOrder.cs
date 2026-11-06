@@ -132,15 +132,15 @@ namespace Domain.Features.WorkOrders
         {
             if (!CanTransitionTo(newState))
             {
-                return WorkOrderErrors.InvalidStateTransition(State, newState);
+                return WorkOrderErrors.InvalidStateTransition(this.State, newState);
             }
 
-            State = newState;
+            this.State = newState;
 
             return Result.Updated;
         }
 
-        public bool IsEditable => State is not (WorkOrderState.Completed or WorkOrderState.Cancelled or WorkOrderState.InProgress);
+        public bool IsEditable => this.State is not (WorkOrderState.Completed or WorkOrderState.Cancelled or WorkOrderState.InProgress);
 
         public bool CanTransitionTo(WorkOrderState newStatus)
         {
@@ -191,6 +191,11 @@ namespace Domain.Features.WorkOrders
             Spot = newSpot;
 
             return Result.Updated;
+        }
+
+        public object ToListItemDto()
+        {
+            throw new NotImplementedException();
         }
     }
 }

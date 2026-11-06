@@ -6,24 +6,20 @@ using MechanicShop.Infrastructure.Data;
 using Scalar.AspNetCore;
 using Serilog;
 
-
 var builder = WebApplication.CreateBuilder(args);
-
 
 builder.Services
     .AddPresentation(builder.Configuration)
     .AddApplication()
     .AddInfrastructure(builder.Configuration);
 
-
-builder.Host.UseSerilog((context, loggerConfig) =>
-    loggerConfig.ReadFrom.Configuration(context.Configuration));
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi().WithDocumentPerVersion();
+    app.MapOpenApi();
 
     app.MapScalarApiReference();
 
@@ -37,7 +33,6 @@ else
 app.UseCoreMiddlewares(builder.Configuration);
 
 app.MapControllers();
-
 
 app.MapHub<WorkOrderHub>("/hubs/workorders");
 

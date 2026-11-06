@@ -43,11 +43,11 @@ namespace Infrastructure.Services
         }
         public bool IsOutsideOperatingHours(DateTimeOffset startAt, TimeSpan duration)
         {
-            var opening = startAt.Date.Add(appSettings.OpeningTime.ToTimeSpan());
-            var closing = startAt.Date.Add(appSettings.ClosingTime.ToTimeSpan());
-            var endAt = startAt + duration;
+          var opening = startAt.Date.Add(this.appSettings.OpeningTime.ToTimeSpan());
+        var closing = startAt.Date.Add(this.appSettings.ClosingTime.ToTimeSpan());
+        var endAt = startAt + duration;
 
-            return startAt < opening || endAt > closing;
+        return startAt < opening || endAt > closing;
         }
 
         public async Task<bool> IsVehicleAlreadyScheduled(

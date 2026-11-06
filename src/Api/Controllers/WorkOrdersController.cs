@@ -2,7 +2,6 @@ using Api.Controllers;
 using Api.Requests.WorkOrders;
 using Application.Common.Models;
 using Application.Features.Scheduling.Dtos;
-using Application.Features.Scheduling.Queries.GetDailyScheduleQuery;
 using Application.Features.WorkOrders.Commands.AssignNewLabor;
 using Application.Features.WorkOrders.Commands.CreateWorkOrder;
 using Application.Features.WorkOrders.Commands.DeleteWorkOrder;
@@ -16,6 +15,7 @@ using Asp.Versioning;
 using Domain.Features.Employees;
 using Domain.Features.WorkOrders;
 using Domain.Features.WorkOrders.Enums;
+using MechanicShop.Application.Features.Scheduling.Queries.GetDailyScheduleQuery;
 using MediatR;
 
 using Microsoft.AspNetCore.Authorization;
@@ -36,31 +36,29 @@ public sealed class WorkOrdersController(ISender sender) : ApiController
     [EndpointDescription("Supports filtering by date range, status, vehicle, labor, spot, and searching by term. Pagination and sorting are supported.")]
     [EndpointName("GetWorkOrders")]
     [MapToApiVersion("1.0")]
-    public async Task<IActionResult> Get([FromQuery] WorkOrderFilterRequest filters, [FromQuery] PageRequest pageRequest, CancellationToken ct)
+    public async Task<IActionResult> Get([FromQuery] WorkOrderFilterRequest filters,  CancellationToken ct)
     {
-        if (pageRequest.Page <= 0)
+        if (filters.Page <= 0)
         {
             return BadRequest("Page must be greater than 0");
         }
 
-        if (pageRequest.PageSize <= 0 || pageRequest.PageSize > 100)
+        if (filters.PageSize <= 0 || filters.PageSize > 100)
         {
             return BadRequest("PageSize must be between 1 and 100");
         }
 
         var query = new GetWorkOrdersQuery(
-            pageRequest.Page,
-            pageRequest.PageSize,
+            filters.Page,
+            filters.PageSize,
             filters.SearchTerm,
             filters.SortColumn,
             filters.SortDirection,
             filters.State is not null ? (WorkOrderState)(int)filters.State : null,
             filters.VehicleId,
             filters.LaborId,
-            filters.StartDateFrom,
-            filters.StartDateTo,
-            filters.EndDateFrom,
-            filters.EndDateTo,
+            filters.StartDate,
+            filters.EndDate,
             filters.Spot is not null ? (Spot)(int)filters.Spot : null);
 
         var result = await sender.Send(query, ct);
@@ -102,7 +100,7 @@ public sealed class WorkOrdersController(ISender sender) : ApiController
             new CreateWorkOrderCommand(
             (Spot)(int)request.Spot,
             request.VehicleId,
-            request.StartAtUtc,
+            request.StartAt,
             request.RepairTaskIds,
             request.LaborId),
             ct);
@@ -217,6 +215,7 @@ public sealed class WorkOrdersController(ISender sender) : ApiController
              Problem);
     }
 
+    
     [HttpGet("schedule/{date}")]
     [Authorize]
     [ProducesResponseType(typeof(ScheduleDto), StatusCodes.Status200OK)]
@@ -263,4 +262,3 @@ public sealed class WorkOrdersController(ISender sender) : ApiController
             Problem);
     }
 }
-

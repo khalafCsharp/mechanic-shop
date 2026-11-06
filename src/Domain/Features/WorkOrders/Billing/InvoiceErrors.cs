@@ -1,7 +1,7 @@
-using Domain.Common.Results.Errors;
-
 namespace Domain.Features.WorkOrders.Billing
 {
+    using Domain.Common.Results.Errors;
+
     public static class InvoiceErrors
     {
         public static readonly Error WorkOrderIdInvalid = Error.Validation(
